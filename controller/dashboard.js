@@ -123,11 +123,11 @@ const dashboardController = {
         try {
             // Parse the number of months from query parameters (default to 3)
             const monthsRange = parseInt(req.query.months) || 3;
-    
+
             // Calculate start and end dates
             const endDate = moment().endOf('month'); // End of current month
             const startDate = moment().subtract(monthsRange - 1, 'months').startOf('month'); // Start of the range
-    
+
             // Aggregate bookings within the date range
             const bookingStats = await Booking.aggregate([
                 {
@@ -138,34 +138,34 @@ const dashboardController = {
                 {
                     $group: {
                         _id: { $month: "$date" }, // Group by month number
-                        totalRevenue: { $sum: "$payment" },
-                        totalCancellations: {
-                            $sum: { $cond: [{ $eq: ["$isCancelled", true] }, 1, 0] }
-                        }
+                        totalRevenue: { $sum: "$payment" }, // Total revenue
+                        totalCanceledAmount: {
+                            $sum: { $cond: [{ $eq: ["$isCancelled", true] }, "$payment", 0] }
+                        } // Sum of payments for canceled bookings
                     }
                 },
                 { $sort: { _id: 1 } } // Sort by month
             ]);
-    
+
             // Format the data
             const formattedData = bookingStats.map((stat) => ({
                 month: moment().month(stat._id - 1).format("MMM"), // Convert month number to name
                 revenue: stat.totalRevenue,
-                cancellations: stat.totalCancellations
+                canceledAmount: stat.totalCanceledAmount // Total amount refunded due to cancellations
             }));
-    
+
             // Respond with formatted data
             res.status(200).json({
                 success: true,
                 message: 'Data fetched successfully.',
                 data: formattedData
             });
-    
+
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, message: 'Failed to fetch data' });
         }
-    }    
+    }
 }
 
 module.exports = { dashboardController }
