@@ -25,7 +25,7 @@ const bookingSchema = mongoose.Schema({
     refundStatus: {
         type: String,
         enum: ["Not-Disbursed", "Not Applicable", "Disbursed"], // Define allowed values
-        default: "Not-Disbursed" // Assign a single default value
+        default: "Not Applicable" // Assign a single default value
     }
 
 },

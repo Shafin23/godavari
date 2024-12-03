@@ -122,6 +122,7 @@ const bookingController = {
 
             // Cancel the booking by setting isCancelled to true
             booking.isCancelled = true;
+            booking.refundStatus = "Not Applicable";
 
             // Save the updated booking
             await booking.save();
