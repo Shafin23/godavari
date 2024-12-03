@@ -392,10 +392,10 @@ const bookingController = {
             // Get today's date (midnight start and just before midnight end)
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0); // Set to midnight of today
-
+    
             const tomorrowStart = new Date(todayStart);
             tomorrowStart.setDate(todayStart.getDate() + 1); // Set to midnight of the next day
-
+    
             // Aggregation pipeline to get today's bookings
             let result = await Booking.aggregate([
                 {
@@ -408,27 +408,29 @@ const bookingController = {
                     $project: {
                         Booking_ID: "$bookingID",
                         Boat_Name: "$boatName", // Rename boatName to Boat_Name
-                        Journey_Time: "$date",  // Rename date to Journey_Time
-                        Payment_Type: "$paymentType",  // Rename paymentType to Payment_Type
-                        Passenger_Name: { $arrayElemAt: ["$passenger.fullName", 0] },  // First passenger name
+                        Journey_Time: {
+                            $dateToString: { format: "%d %B, %Y", date: "$date" } // Format Journey_Time
+                        },
+                        Payment_Type: "$paymentType", // Rename paymentType to Payment_Type
+                        Passenger_Name: { $arrayElemAt: ["$passenger.fullName", 0] }, // First passenger name
                         totalAdults: {
                             $size: {
                                 $filter: {
                                     input: "$passenger",
                                     as: "p",
-                                    cond: { $gte: ["$$p.age", 18] }  // Adults are considered age 18+
+                                    cond: { $gte: ["$$p.age", 18] } // Adults are considered age 18+
                                 }
                             }
-                        },  // Total number of adults
+                        }, // Total number of adults
                         totalChildren: {
                             $size: {
                                 $filter: {
                                     input: "$passenger",
                                     as: "p",
-                                    cond: { $lt: ["$$p.age", 18] }  // Children are considered age < 18
+                                    cond: { $lt: ["$$p.age", 18] } // Children are considered age < 18
                                 }
                             }
-                        }  // Total number of children
+                        } // Total number of children
                     }
                 },
                 {
@@ -448,14 +450,14 @@ const bookingController = {
                     }
                 }
             ]);
-
+    
             // Modify result to change `No_of_Passenger` to `No._of_Passenger`
             result = result.map(booking => ({
                 ...booking,
                 "No._of_Passenger": booking.No_of_Passenger, // Add a new field with the desired name
                 No_of_Passenger: undefined // Remove the original field (optional)
             }));
-
+    
             return res.status(200).json({ success: true, data: result });
         } catch (error) {
             console.error(error);
