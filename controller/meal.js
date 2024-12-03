@@ -72,6 +72,11 @@ const mealController = {
         try {
             const statistics = await Booking.aggregate([
                 {
+                    $match: {
+                        isCancelled: false // Only include non-cancelled bookings
+                    }
+                },
+                {
                     $project: {
                         // Ensure fields are numeric or default to 0 using $ifNull and $toDouble
                         totalMeal: {
@@ -94,7 +99,7 @@ const mealController = {
                     }
                 }
             ]);
-
+    
             res.json({
                 success: true,
                 data: statistics[0] || { totalMeal: 0, veg: 0, noVeg: 0 } // Handle case with no data
