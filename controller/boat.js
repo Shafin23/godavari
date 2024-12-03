@@ -45,9 +45,9 @@ const boatController = {
                 photos = req.files.map((file) => `http://localhost:5000/uploads/${file.filename}`);
             }
 
-            const isAlreadyExist = await Boat.findOne({name:name})
-            if(isAlreadyExist){
-                return res.json({success: false, message: "Boat already exist"})
+            const isAlreadyExist = await Boat.findOne({ name: name })
+            if (isAlreadyExist) {
+                return res.json({ success: false, message: "Boat already exist" })
             }
 
             const addingNewBoat = new Boat({
@@ -76,7 +76,7 @@ const boatController = {
             // Get skip and limit from query parameters (if provided)
             const skip = parseInt(req.query.skip) || 0; // Number of documents to skip
             const limit = parseInt(req.query.limit) || 10; // Number of documents to fetch per batch
-    
+
             // Fetch the next batch of boats
             const boatList = await Boat.find({}, {
                 _id: 1,
@@ -89,7 +89,7 @@ const boatController = {
                 .sort({ _id: 1 }) // Sort by _id to ensure consistency
                 .skip(skip) // Skip the specified number of documents
                 .limit(limit); // Limit the number of documents
-    
+
             // Format the response keys to match the table headings
             const formattedBoatList = boatList.map((boat) => ({
                 _id: boat._id,
@@ -102,7 +102,7 @@ const boatController = {
                 Activity: boat.isActive ? "Active" : "Inactive",
                 Owners_Contact: boat.ownersContactNumber,
             }));
-    
+
             res.json({
                 success: true,
                 limit,
@@ -153,6 +153,31 @@ const boatController = {
         }
     },
 
+    updateWillActive : async (req, res) => {
+        try {
+            const { boatId } = req.params; // Get the boat ID from the route parameters
+            const { willActive } = req.body; // Get the new willActive date from the request body
+
+            if (!willActive) {
+                return res.status(400).json({ success: false, message: "The willActive field is required." });
+            }
+
+            const updatedBoat = await Boat.findByIdAndUpdate(
+                boatId,
+                { willActive }, // Update the willActive field
+                { new: true, runValidators: true } // Return the updated document and run schema validators
+            );
+
+            if (!updatedBoat) {
+                return res.status(404).json({ success: false, message: "Boat not found." });
+            }
+
+            res.status(200).json({ success: true, message: "WillActive field updated successfully.", data: updatedBoat });
+        } catch (error) {
+            console.error("Error updating willActive:", error);
+            res.status(500).json({ success: false, message: "Failed to update willActive field.", error });
+        }
+    },
     // Get a specific boat by ID (Optimized with Aggregation)
     getBoatById: async (req, res) => {
         try {

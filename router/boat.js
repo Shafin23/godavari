@@ -6,6 +6,7 @@ const router = express.Router()
 router.post("/addBoat", upload.array("photos", 10), boatController.addBoat)
 router.get("/getBoatList", boatController.getBoatList)
 router.put("/updateActiveStatusOfBoat/:id", boatController.updateActiveStatusOfBoat)
+router.put("/updateWillActive/:boatId", boatController.updateWillActive)
 router.get("/getBoatById/:id", boatController.getBoatById)
 
 module.exports =  router 
