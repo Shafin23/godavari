@@ -96,7 +96,7 @@ const boatController = {
                 Boat_Name: boat.name,
                 Total_capacity: `${boat.capacity} Passengers`,
                 Status: boat.isActive ? "Currently Available" : "Under maintenance",
-                Upcoming_availability: boat.willActive
+                Upcoming_availability: boat.isActive == false
                     ? formatAvailability(boat.willActive)
                     : "Available", // Format willActive or fallback to "Available"
                 Activity: boat.isActive ? "Active" : "Inactive",
@@ -153,7 +153,7 @@ const boatController = {
         }
     },
 
-    updateWillActive : async (req, res) => {
+    updateWillActive: async (req, res) => {
         try {
             const { boatId } = req.params; // Get the boat ID from the route parameters
             const { willActive } = req.body; // Get the new willActive date from the request body

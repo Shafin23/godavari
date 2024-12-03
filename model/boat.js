@@ -38,7 +38,7 @@ const boatSchema = mongoose.Schema({
         pureVeg: { type: Boolean, default: false }
     },
     isActive: { type: Boolean, default: false },
-    willActive: String,
+    willActive: Date,
     ownersContactNumber: String,
     priceSection: {
         adult: Number,
