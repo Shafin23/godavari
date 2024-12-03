@@ -1,6 +1,6 @@
 const express = require("express")
 const { boatController } = require("../controller/boat")
-const upload = require("../utilityFunction/upload")
+const upload = require("../middleware/fileUploadMiddleware")
 const router = express.Router()
 
 router.post("/addBoat", upload.array("photos", 10), boatController.addBoat)
