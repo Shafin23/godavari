@@ -222,46 +222,98 @@ const boatController = {
             });
         }
     },
-    getParticularBoatByIdForMobileApp: async (req,res)=>{
-        try{
-            const {id} = req.params;
-            const expectedBoat = await Boat.findOne({_id:id})
-            if(!expectedBoat){
-                return res.json({success:false, message:"something went wrong"})
-            } 
-            res.json({success:true,expectedBoat})
-        } 
-        catch (error){
-            res.json({success:falsse, message:"something went wrong"})
+    getParticularBoatByIdForMobileApp: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const expectedBoat = await Boat.findOne({ _id: id });
+            if (!expectedBoat) {
+                return res.json({ success: false, message: "Boat not found" });
+            }
+    
+            let amenitiesArray = [];
+            let safetyFeaturesArray = [];
+            let mealsArray = [];
+    
+            // Amenities
+            if (expectedBoat.amenities.cleanRestrooms) {
+                amenitiesArray.push("Clean Restrooms");
+            }
+            if (expectedBoat.amenities.comfortableSeating) {
+                amenitiesArray.push("Comfortable Seating");
+            }
+            if (expectedBoat.amenities.onboardDining) {
+                amenitiesArray.push("Onboard Dining");
+            }
+            if (expectedBoat.amenities.wifiAccess) {
+                amenitiesArray.push("WiFi Access");
+            }
+            if (expectedBoat.amenities.entertainmentSystem) {
+                amenitiesArray.push("Entertainment System");
+            }
+            if (expectedBoat.amenities.airConditioning) {
+                amenitiesArray.push("Air Conditioning");
+            }
+    
+            // Safety Features
+            if (expectedBoat.safetyFeatures.lifeJackets) {
+                safetyFeaturesArray.push("Life Jackets");
+            }
+            if (expectedBoat.safetyFeatures.emergencyKit) {
+                safetyFeaturesArray.push("Emergency Kit");
+            }
+            if (expectedBoat.safetyFeatures.fireExtinguishers) {
+                safetyFeaturesArray.push("Fire Extinguishers");
+            }
+    
+            // Meals
+            if (expectedBoat.meals.vegNonVeg) {
+                mealsArray.push("Veg/Non-Veg Meals");
+            }
+            if (expectedBoat.meals.pureVeg) {
+                mealsArray.push("Pure Veg Meals");
+            }
+    
+            res.json({
+                success: true,
+                name: expectedBoat.name,
+                photos: expectedBoat.photo, // Assuming the property is named `photo`
+                amenities: amenitiesArray,
+                safetyFeatures: safetyFeaturesArray,
+                meals: mealsArray
+            });
+        } catch (error) {
+            res.json({ success: false, message: "Something went wrong" });
         }
     },
     getBoatListForMobileApp: async (req, res) => {
-    try {
-        // Fetch boats from the database
-        const boats = await Boat.find({}, {
-            name: 1,                    // Select the boat name
-            photo: 1,                   // Select the list of photos
-            capacity: 1,                // Select the capacity
-            'priceSection.adult': 1     // Select the price for adult
-        });
+        try {
+            // Fetch boats from the database
+            const boats = await Boat.find({}, {
+                _id: 1,
+                name: 1,                    // Select the boat name
+                photo: 1,                   // Select the list of photos
+                capacity: 1,                // Select the capacity
+                'priceSection.adult': 1     // Select the price for adult
+            });
 
-        // Format the response
-        const formattedBoats = boats.map(boat => ({
-            boatName: boat.name,
-            photos: boat.photo,        // Provide the entire photo list
-            capacity: boat.capacity,
-            priceForAdult: boat.priceSection?.adult
-        }));
+            // Format the response
+            const formattedBoats = boats.map(boat => ({
+                id: boat._id,
+                boatName: boat.name,
+                photos: boat.photo,        // Provide the entire photo list
+                capacity: boat.capacity,
+                priceForAdult: boat.priceSection?.adult
+            }));
 
-        // Send the response
-        res.status(200).json(formattedBoats);
-    } catch (error) {
-        console.error("Error fetching boat details:", error);
-        res.status(500).json({ message: "Error fetching boat details", error });
+            // Send the response
+            res.status(200).json(formattedBoats);
+        } catch (error) {
+            console.error("Error fetching boat details:", error);
+            res.status(500).json({ message: "Error fetching boat details", error });
+        }
     }
-}
 
- 
+
 }
 
 module.exports = { boatController }
