@@ -8,5 +8,7 @@ router.get("/getBoatList", boatController.getBoatList)
 router.put("/updateActiveStatusOfBoat/:id", boatController.updateActiveStatusOfBoat)
 router.put("/updateWillActive/:boatId", boatController.updateWillActive)
 router.get("/getBoatById/:id", boatController.getBoatById)
+router.get("/getParticularBoatByIdForMobileApp/:id", boatController.getParticularBoatByIdForMobileApp)
+router.get("/getBoatListForMobileApp", boatController.getBoatListForMobileApp)
 
 module.exports =  router 

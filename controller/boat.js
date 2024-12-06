@@ -221,7 +221,47 @@ const boatController = {
                 error: error.message
             });
         }
+    },
+    getParticularBoatByIdForMobileApp: async (req,res)=>{
+        try{
+            const {id} = req.params;
+            const expectedBoat = await Boat.findOne({_id:id})
+            if(!expectedBoat){
+                return res.json({success:false, message:"something went wrong"})
+            } 
+            res.json({success:true,expectedBoat})
+        } 
+        catch (error){
+            res.json({success:falsse, message:"something went wrong"})
+        }
+    },
+    getBoatListForMobileApp: async (req, res) => {
+    try {
+        // Fetch boats from the database
+        const boats = await Boat.find({}, {
+            name: 1,                    // Select the boat name
+            photo: 1,                   // Select the list of photos
+            capacity: 1,                // Select the capacity
+            'priceSection.adult': 1     // Select the price for adult
+        });
+
+        // Format the response
+        const formattedBoats = boats.map(boat => ({
+            boatName: boat.name,
+            photos: boat.photo,        // Provide the entire photo list
+            capacity: boat.capacity,
+            priceForAdult: boat.priceSection?.adult
+        }));
+
+        // Send the response
+        res.status(200).json(formattedBoats);
+    } catch (error) {
+        console.error("Error fetching boat details:", error);
+        res.status(500).json({ message: "Error fetching boat details", error });
     }
+}
+
+ 
 }
 
 module.exports = { boatController }
