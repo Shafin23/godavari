@@ -1,5 +1,8 @@
 const express = require("express")
 const app = express()
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const bodyParser = require('body-parser');
 require("dotenv").config()
 const port = process.env.PORT || 5000
 
@@ -10,6 +13,61 @@ const { finalErrorHandler } = require("./utilityFunction/finalErrorHandler")
 const { applicationMiddleware } = require("./middleware/applicationMiddleware")
 const { routeHandlingMiddleware } = require("./middleware/routeHandlingMiddleware")
 
+
+// Razorpay payment integration--------------------------------------
+const instance = new Razorpay({
+    key_id: 'rzp_test_9utBHx11kNXM5B', // Replace with your key_id
+    key_secret: 't1IdSHtpLM44yNPzpfDGIHD3', // Replace with your key_secret
+});
+
+app.use(bodyParser.json());
+
+
+app.post("/an", async (req, res) => {
+    try {
+        const { name } = req.body
+        console.log("---------------------->", name)
+        res.json({ message: " Working", name })
+    } catch (error) {
+        res.json({ message: '121' })
+    }
+})
+
+
+// Payment order 
+app.post("/createOrder", async (req, res) => {
+    const { amount, currency } = req.body 
+    console.log("9999999999999999999999999999999999999999",amount, currency)
+    try {
+        const options = {
+            amount: amount * 100, // Amount in paise
+            currency: currency || "INR",
+            receipt: "receipt_order_" + Math.random(),
+        };
+        const order = await instance.orders.create(options);
+        res.status(200).json({ success: true, order });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: "Something went wrong" });
+    }
+});
+
+// Payment verification এন্ডপয়েন্ট
+app.post("/verify-payment", (req, res) => {
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    const shasum = crypto.createHmac("sha256", "YOUR_RAZORPAY_SECRET");
+    shasum.update(razorpay_order_id + "|" + razorpay_payment_id);
+    const digest = shasum.digest("hex");
+
+    if (digest === razorpay_signature) {
+        res.status(200).json({ success: true, message: "Payment verified successfully" });
+    } else {
+        res.status(400).json({ success: false, message: "Invalid signature" });
+    }
+});
+// =====================================================================
 
 // middleware
 applicationMiddleware(app) // application middleware
