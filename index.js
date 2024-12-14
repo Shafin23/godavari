@@ -36,8 +36,8 @@ app.post("/an", async (req, res) => {
 
 // Payment order 
 app.post("/createOrder", async (req, res) => {
-    const { amount, currency } = req.body 
-    console.log("9999999999999999999999999999999999999999",amount, currency)
+    const { amount, currency } = req.body
+
     try {
         const options = {
             amount: amount * 100, // Amount in paise
@@ -53,20 +53,58 @@ app.post("/createOrder", async (req, res) => {
 });
 
 // Payment verification এন্ডপয়েন্ট
+// app.post("/verify-payment", (req, res) => {
+
+//     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+//     const shasum = crypto.createHmac("sha256", "t1IdSHtpLM44yNPzpfDGIHD3");
+//     shasum.update(razorpay_order_id + "|" + razorpay_payment_id);
+//     const digest = shasum.digest("hex");
+
+//     if (digest === razorpay_signature) {
+//         res.status(200).json({ success: true, message: "Payment verified successfully" });
+//     } else {
+//         res.status(400).json({ success: false, message: "Invalid signature" });
+//     }
+// });
+
+
+
+console.time("verify-payment"); // Start timer
+
 app.post("/verify-payment", (req, res) => {
+    console.timeLog("verify-payment", "Received request");
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    const shasum = crypto.createHmac("sha256", "t1IdSHtpLM44yNPzpfDGIHD3");
-    shasum.update(razorpay_order_id + "|" + razorpay_payment_id);
-    const digest = shasum.digest("hex");
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        console.timeLog("verify-payment", "Invalid payload");
+        return res.status(400).json({ success: false, message: "Invalid request payload" });
+    }
 
-    if (digest === razorpay_signature) {
-        res.status(200).json({ success: true, message: "Payment verified successfully" });
-    } else {
-        res.status(400).json({ success: false, message: "Invalid signature" });
+    try {
+        console.timeLog("verify-payment", "Starting signature verification");
+
+        const shasum = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
+        shasum.update(razorpay_order_id + "|" + razorpay_payment_id);
+        const digest = shasum.digest("hex");
+
+        console.timeLog("verify-payment", "Signature verification complete");
+
+        if (digest === razorpay_signature) {
+            console.timeEnd("verify-payment"); // End timer
+            return res.status(200).json({ success: true, message: "Payment verified successfully" });
+        } else {
+            console.timeEnd("verify-payment"); // End timer
+            return res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+    } catch (error) {
+        console.error("Error during payment verification:", error);
+        console.timeEnd("verify-payment"); // End timer
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+
 // =====================================================================
 
 // middleware
