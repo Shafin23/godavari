@@ -57,7 +57,7 @@ app.post("/verify-payment", (req, res) => {
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    const shasum = crypto.createHmac("sha256", "YOUR_RAZORPAY_SECRET");
+    const shasum = crypto.createHmac("sha256", "t1IdSHtpLM44yNPzpfDGIHD3");
     shasum.update(razorpay_order_id + "|" + razorpay_payment_id);
     const digest = shasum.digest("hex");
 
