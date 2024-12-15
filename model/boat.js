@@ -17,7 +17,7 @@ const boatSchema = mongoose.Schema({
         min: 1 // Ensure capacity is at least 1
     },
     photo: {
-        type: [String],
+        type: [String], // max three images
         required: true
     },
     amenities: {

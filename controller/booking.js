@@ -468,12 +468,11 @@ const bookingController = {
     getBookingById: async (req, res) => {
         try {
             const { bookingID } = req.params;
-
             if (!bookingID) {
                 return res.status(400).json({ success: false, message: "Booking ID is required" });
             }
 
-            const booking = await Booking.findOne({ bookingID });
+            const booking = await Booking.findOne({_id: bookingID });
 
             if (!booking) {
                 return res.status(404).json({ success: false, message: "Booking not found" });
@@ -484,7 +483,47 @@ const bookingController = {
             console.error(error);
             res.status(500).json({ success: false, message: "Failed to fetch booking details" });
         }
+    },
+    getBookingByIdForMobile: async (req, res) => {
+        try {
+            const { bookingID } = req.params;
+            if (!bookingID) {
+                return res.status(400).json({ success: false, message: "Booking ID is required" });
+            }
+    
+            // Fetch only the required fields
+            const booking = await Booking.findOne(
+                { _id: bookingID },
+                {
+                    bookingID: 1,
+                    boatName: 1,
+                    phoneNumber: 1,
+                    date: 1,
+                    passenger: 1 // Include the passenger array to extract specific details
+                }
+            );
+    
+            if (!booking) {
+                return res.status(404).json({ success: false, message: "Booking not found" });
+            }
+    
+            // Prepare the response structure
+            const response = {
+                bookingID: booking.bookingID,
+                boatName: booking.boatName,
+                phoneNumber: booking.phoneNumber,
+                totalNumberOfPassenger: booking.passenger.length,
+                firstPassengerName: booking.passenger.length > 0 ? booking.passenger[0].fullName : null,
+                date: booking.date
+            };
+    
+            res.status(200).json({ success: true, data: response });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, message: "Failed to fetch booking details" });
+        }
     }
+    
 }
 
 module.exports = { bookingController }

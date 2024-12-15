@@ -11,5 +11,6 @@ router.get("/getBookingsWithInsurance", bookingController.getBookingsWithInsuran
 router.get("/getBookingsWithTourGuide", bookingController.getBookingsWithTourGuide)
 router.get("/getTodaysBookings", bookingController.getTodaysBookings)
 router.get("/getBookingById/:bookingID", bookingController.getBookingById)
+router.get("/getBookingByIdForMobile/:bookingID", bookingController.getBookingByIdForMobile)
 
 module.exports = router 
