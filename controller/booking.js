@@ -285,7 +285,7 @@ const bookingController = {
 
             // Aggregation pipeline
             const pipeline = [
-                { $match: { insurance: true, isCancelled:false } }, // Filter bookings with insurance set to true
+                { $match: { insurance: true, isCancelled: false } }, // Filter bookings with insurance set to true
                 {
                     $project: {
                         Contact_no: "$phoneNumber", // Phone number as Contact_no
@@ -340,7 +340,7 @@ const bookingController = {
 
             // Aggregation pipeline
             const pipeline = [
-                { $match: { tourGuide: true, isCancelled:false } }, // Filter bookings with insurance set to true
+                { $match: { tourGuide: true, isCancelled: false } }, // Filter bookings with insurance set to true
                 {
                     $project: {
                         Contact_no: "$phoneNumber", // Phone number as Contact_no
@@ -393,10 +393,10 @@ const bookingController = {
             // Get today's date (midnight start and just before midnight end)
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0); // Set to midnight of today
-    
+
             const tomorrowStart = new Date(todayStart);
             tomorrowStart.setDate(todayStart.getDate() + 1); // Set to midnight of the next day
-    
+
             // Aggregation pipeline to get today's bookings
             let result = await Booking.aggregate([
                 {
@@ -451,14 +451,14 @@ const bookingController = {
                     }
                 }
             ]);
-    
+
             // Modify result to change `No_of_Passenger` to `No._of_Passenger`
             result = result.map(booking => ({
                 ...booking,
                 "No._of_Passenger": booking.No_of_Passenger, // Add a new field with the desired name
                 No_of_Passenger: undefined // Remove the original field (optional)
             }));
-    
+
             return res.status(200).json({ success: true, data: result });
         } catch (error) {
             console.error(error);
@@ -472,7 +472,7 @@ const bookingController = {
                 return res.status(400).json({ success: false, message: "Booking ID is required" });
             }
 
-            const booking = await Booking.findOne({_id: bookingID });
+            const booking = await Booking.findOne({ _id: bookingID });
 
             if (!booking) {
                 return res.status(404).json({ success: false, message: "Booking not found" });
@@ -486,14 +486,14 @@ const bookingController = {
     },
     getBookingByIdForMobile: async (req, res) => {
         try {
-            const { bookingID } = req.params;
-            if (!bookingID) {
-                return res.status(400).json({ success: false, message: "Booking ID is required" });
+            const { phoneNumber } = req.params;
+            if (!phoneNumber) {
+                return res.status(400).json({ success: false, message: "PhoneNumber is required" });
             }
     
             // Fetch only the required fields
-            const booking = await Booking.findOne(
-                { _id: bookingID },
+            const bookings = await Booking.find(
+                { phoneNumber },
                 {
                     bookingID: 1,
                     boatName: 1,
@@ -503,27 +503,27 @@ const bookingController = {
                 }
             );
     
-            if (!booking) {
-                return res.status(404).json({ success: false, message: "Booking not found" });
+            if (!bookings || bookings.length === 0) {
+                return res.status(404).json({ success: false, message: "Bookings not found" });
             }
     
             // Prepare the response structure
-            const response = {
+            const response = bookings.map((booking) => ({
                 bookingID: booking.bookingID,
                 boatName: booking.boatName,
                 phoneNumber: booking.phoneNumber,
                 totalNumberOfPassenger: booking.passenger.length,
                 firstPassengerName: booking.passenger.length > 0 ? booking.passenger[0].fullName : null,
                 date: booking.date
-            };
+            }));
     
             res.status(200).json({ success: true, data: response });
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, message: "Failed to fetch booking details" });
         }
-    }
-    
+    }    
+
 }
 
 module.exports = { bookingController }
