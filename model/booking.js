@@ -10,9 +10,9 @@ const bookingSchema = mongoose.Schema({
         age: Number,
         gender: String
     }],
-    privateCar_4seater: { type: Boolean, default: false },
-    privateCar_7seater: { type: Boolean, default: false },
-    shared_rides: { type: Boolean, default: false },
+    privateCar_4seater: { type: Number, default: 0 },
+    privateCar_7seater: { type: Number, default: 0 },
+    shared_rides: { type: Number, default: 0 },
     breakFast: { type: Number, default: 0 },
     vegLunch: { type: Number, default: 0 },
     nonVegLunch: { type: Number, default: 0 },
