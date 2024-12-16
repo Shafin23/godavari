@@ -292,7 +292,7 @@ const boatController = {
                 _id: 1,
                 name: 1,                    // Select the boat name
                 photo: 1,                   // Select the list of photos
-                capacity: 1,                // Select the capacity
+                availableSeats: 1,                // Select the capacity
                 'priceSection.adult': 1     // Select the price for adult
             });
 
