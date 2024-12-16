@@ -301,7 +301,7 @@ const boatController = {
                 id: boat._id,
                 boatName: boat.name,
                 photos: boat.photo,        // Provide the entire photo list
-                capacity: boat.capacity,
+                capacity: boat.availableSeats,
                 priceForAdult: boat.priceSection?.adult
             }));
 
