@@ -496,6 +496,7 @@ const bookingController = {
                 { phoneNumber },
                 {
                     bookingID: 1,
+                    isCancelled:1,
                     boatName: 1,
                     phoneNumber: 1,
                     date: 1,
@@ -514,7 +515,8 @@ const bookingController = {
                 phoneNumber: booking.phoneNumber,
                 totalNumberOfPassenger: booking.passenger.length,
                 firstPassengerName: booking.passenger.length > 0 ? booking.passenger[0].fullName : null,
-                date: booking.date
+                date: booking.date,
+                isCancelled: booking.isCancelled
             }));
     
             res.status(200).json({ success: true, data: response });
@@ -523,7 +525,6 @@ const bookingController = {
             res.status(500).json({ success: false, message: "Failed to fetch booking details" });
         }
     }    
-
 }
 
 module.exports = { bookingController }
