@@ -1,5 +1,6 @@
 const { Boat } = require("../model/boat")
 const { Booking } = require("../model/booking")
+const mongoose = require('mongoose');
 const { generatingBookingID } = require("../utilityFunction/generatingBookingID")
 
 
@@ -14,6 +15,9 @@ const bookingController = {
         }
     },
     book: async (req, res) => {
+        const session = await mongoose.startSession(); // Start a session for transactions
+        session.startTransaction(); // Begin the transaction
+
         try {
             const {
                 phoneNumber,
@@ -40,20 +44,19 @@ const bookingController = {
             // Generate a unique bookingID
             const bookingID = generatingBookingID();
 
-            // Find the boat document by boatName
-            const boat = await Boat.findOne({ name: boatName });
+            // Find and update the boat's availableSeats atomically
+            const updatedBoat = await Boat.findOneAndUpdate(
+                { name: boatName, availableSeats: { $gt: 0 }, isActive: true }, // Ensure boat has capacity and is active
+                { $inc: { availableSeats: -1 } }, // Decrement availableSeats by 1
+                { new: true, session } // Return the updated document and include session for the transaction
+            );
 
-            // If boat is not found, return an error
-            if (!boat) {
-                return res.status(404).json({ message: 'Boat not found' });
-            }
-
-            // Ensure the boat has capacity available
-            if (boat.availableSeats <= 0) {
-                return res.status(400).json({ message: 'No available capacity for the selected boat' });
-            }
-            if (!boat.isActive) {
-                return res.json({ message: "Boat is not available" })
+            if (!updatedBoat) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({
+                    message: 'No available capacity for the selected boat or the boat is inactive'
+                });
             }
 
             // Create a new booking document
@@ -75,16 +78,12 @@ const bookingController = {
                 payment
             });
 
-            // Save the booking
-            await newBooking.save();
+            // Save the booking in the same transaction
+            await newBooking.save({ session });
 
-
-
-            // Reduce the boat capacity by 1
-            boat.availableSeats -= 1;
-
-            // Save the updated boat document
-            await boat.save();
+            // Commit the transaction
+            await session.commitTransaction();
+            session.endSession();
 
             // Return the success response
             return res.status(201).json({
@@ -93,6 +92,9 @@ const bookingController = {
                 booking: newBooking
             });
         } catch (error) {
+            // Rollback the transaction in case of any errors
+            await session.abortTransaction();
+            session.endSession();
             console.error(error);
             return res.status(500).json({ message: 'Internal server error' });
         }
@@ -490,24 +492,24 @@ const bookingController = {
             if (!phoneNumber) {
                 return res.status(400).json({ success: false, message: "PhoneNumber is required" });
             }
-    
+
             // Fetch only the required fields
             const bookings = await Booking.find(
                 { phoneNumber },
                 {
                     bookingID: 1,
-                    isCancelled:1,
+                    isCancelled: 1,
                     boatName: 1,
                     phoneNumber: 1,
                     date: 1,
                     passenger: 1 // Include the passenger array to extract specific details
                 }
             );
-    
+
             if (!bookings || bookings.length === 0) {
                 return res.status(404).json({ success: false, message: "Bookings not found" });
             }
-    
+
             // Prepare the response structure
             const response = bookings.map((booking) => ({
                 bookingID: booking.bookingID,
@@ -518,13 +520,13 @@ const bookingController = {
                 date: booking.date,
                 isCancelled: booking.isCancelled
             }));
-    
+
             res.status(200).json({ success: true, data: response });
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, message: "Failed to fetch booking details" });
         }
-    }    
+    }
 }
 
 module.exports = { bookingController }
