@@ -474,7 +474,7 @@ const bookingController = {
                 return res.status(400).json({ success: false, message: "Booking ID is required" });
             }
 
-            const booking = await Booking.findOne({ _id: bookingID });
+            const booking = await Booking.findOne({ bookingID: bookingID });
 
             if (!booking) {
                 return res.status(404).json({ success: false, message: "Booking not found" });
