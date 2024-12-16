@@ -67,6 +67,23 @@ app.post("/verify-payment", (req, res) => {
         res.status(400).json({ success: false, message: "Invalid signature" });
     }
 });
+
+
+app.post("/initiate-refund", async (req, res) => {
+    const { payment_id, amount } = req.body;
+
+    try {
+        const refund = await instance.payments.refund(payment_id, {
+            amount: amount * 100, // Amount in paise
+        });
+
+        res.status(200).json({ success: true, refund });
+    } catch (error) {
+        console.error("Refund Error:", error);
+        res.status(500).json({ success: false, message: "Failed to process refund" });
+    }
+});
+
 // =====================================================================
 
 // middleware
