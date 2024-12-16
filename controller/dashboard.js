@@ -123,11 +123,19 @@ const dashboardController = {
         try {
             // Parse the number of months from query parameters (default to 3)
             const monthsRange = parseInt(req.query.months) || 3;
-
+    
             // Calculate start and end dates
             const endDate = moment().endOf('month'); // End of current month
             const startDate = moment().subtract(monthsRange - 1, 'months').startOf('month'); // Start of the range
-
+    
+            // Initialize all months with default data
+            const allMonths = [];
+            for (let i = 0; i < monthsRange; i++) {
+                const monthName = moment().subtract(i, 'months').format("MMM");
+                allMonths.push({ month: monthName, revenue: 0, canceledAmount: 0 });
+            }
+            allMonths.reverse(); // To keep months in ascending order
+    
             // Aggregate bookings within the date range
             const bookingStats = await Booking.aggregate([
                 {
@@ -146,24 +154,26 @@ const dashboardController = {
                 },
                 { $sort: { _id: 1 } } // Sort by month
             ]);
-
-            // Format the data
-            const formattedData = bookingStats.map((stat) => ({
-                month: moment().month(stat._id - 1).format("MMM"), // Convert month number to name
-                revenue: stat.totalRevenue,
-                canceledAmount: stat.totalCanceledAmount // Total amount refunded due to cancellations
-            }));
-
+    
+            // Map aggregated data to months
+            bookingStats.forEach((stat) => {
+                const monthName = moment().month(stat._id - 1).format("MMM");
+                const index = allMonths.findIndex((item) => item.month === monthName);
+                if (index !== -1) {
+                    allMonths[index].revenue = stat.totalRevenue;
+                    allMonths[index].canceledAmount = stat.totalCanceledAmount;
+                }
+            });
+    
             // Respond with formatted data
             res.status(200).json({
                 success: true,
-                message: 'Data fetched successfully.',
-                data: formattedData
+                message: "Data fetched successfully.",
+                data: allMonths
             });
-
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to fetch data' });
+            res.status(500).json({ success: false, message: "Failed to fetch data" });
         }
     }
 }

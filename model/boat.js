@@ -44,16 +44,18 @@ const boatSchema = mongoose.Schema({
     },
     ownersContactNumber: String,
     priceSection: {
-        adult: Number,
-        child: Number,
-        privateCar_4seater: Number,
-        privateCar_7seater: Number,
-        shared_rides: Number,
-        breakfast: Number,
-        vegLunch: Number,
-        nonVegLunch: Number,
-        tourGuide: Number,
-        insurence: Number
+        priceSection: {
+            adult: { type: Number, default: 1500 },
+            child: { type: Number, default: 1000 },
+            privateCar_4seater: { type: Number, default: 1000 },
+            privateCar_7seater: { type: Number, default: 1000 },
+            shared_rides: { type: Number, default: 500 },
+            breakfast: { type: Number, default: 500 },
+            vegLunch: { type: Number, default: 500 },
+            nonVegLunch: { type: Number, default: 500 },
+            tourGuide: { type: Number, default: 500 },
+            insurence: { type: Number, default: 300 }
+        }
     }
 });
 
