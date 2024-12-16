@@ -229,11 +229,11 @@ const boatController = {
             if (!expectedBoat) {
                 return res.json({ success: false, message: "Boat not found" });
             }
-    
+
             let amenitiesArray = [];
             let safetyFeaturesArray = [];
             let mealsArray = [];
-    
+
             // Amenities
             if (expectedBoat.amenities.cleanRestrooms) {
                 amenitiesArray.push("Clean Restrooms");
@@ -253,7 +253,7 @@ const boatController = {
             if (expectedBoat.amenities.airConditioning) {
                 amenitiesArray.push("Air Conditioning");
             }
-    
+
             // Safety Features
             if (expectedBoat.safetyFeatures.lifeJackets) {
                 safetyFeaturesArray.push("Life Jackets");
@@ -264,7 +264,7 @@ const boatController = {
             if (expectedBoat.safetyFeatures.fireExtinguishers) {
                 safetyFeaturesArray.push("Fire Extinguishers");
             }
-    
+
             // Meals
             if (expectedBoat.meals.vegNonVeg) {
                 mealsArray.push("Veg/Non-Veg Meals");
@@ -272,7 +272,7 @@ const boatController = {
             if (expectedBoat.meals.pureVeg) {
                 mealsArray.push("Pure Veg Meals");
             }
-    
+
             res.json({
                 success: true,
                 name: expectedBoat.name,
@@ -287,14 +287,17 @@ const boatController = {
     },
     getBoatListForMobileApp: async (req, res) => {
         try {
-            // Fetch boats from the database
-            const boats = await Boat.find({}, {
-                _id: 1,
-                name: 1,                    // Select the boat name
-                photo: 1,                   // Select the list of photos
-                availableSeats: 1,                // Select the capacity
-                'priceSection.adult': 1     // Select the price for adult
-            });
+            // Fetch boats from the database where availableSeats >= 1
+            const boats = await Boat.find(
+                { availableSeats: { $gte: 1 } }, // Filter condition: at least 1 seat
+                {
+                    _id: 1,
+                    name: 1,                    // Select the boat name
+                    photo: 1,                   // Select the list of photos
+                    availableSeats: 1,          // Select the capacity
+                    'priceSection.adult': 1     // Select the price for adult
+                }
+            );
 
             // Format the response
             const formattedBoats = boats.map(boat => ({
@@ -312,6 +315,7 @@ const boatController = {
             res.status(500).json({ message: "Error fetching boat details", error });
         }
     }
+
 
 
 }
