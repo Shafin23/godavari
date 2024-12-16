@@ -38,7 +38,10 @@ const boatSchema = mongoose.Schema({
         pureVeg: { type: Boolean, default: false }
     },
     isActive: { type: Boolean, default: false },
-    willActive: Date,
+    willActive: { 
+        type: Date, 
+        default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Default: 7 days from now
+    },
     ownersContactNumber: String,
     priceSection: {
         adult: Number,

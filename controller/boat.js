@@ -2,6 +2,7 @@ const { Boat } = require("../model/boat");
 
 // Helper function to format the `willActive` field
 function formatAvailability(willActive) {
+    console.log(willActive)
     const date = new Date(willActive);
 
     // Format the date part
@@ -38,11 +39,12 @@ const boatController = {
                 meals,
                 ownersContactNumber,
             } = req.body;
+            
 
             // Process uploaded files
             let photos = [];
             if (req.files) {
-                photos = req.files.map((file) => `http://localhost:5000/uploads/${file.filename}`);
+                photos = req.files.map((file) => `https://godavari-xm9d.vercel.app/uploads/${file.filename}`);
             }
 
             const isAlreadyExist = await Boat.findOne({ name: name })

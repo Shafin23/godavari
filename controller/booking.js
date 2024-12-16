@@ -103,7 +103,7 @@ const bookingController = {
         try {
             const { bookingID } = req.body; // Expect the bookingID in the request body
 
-            console.log('---------------', bookingID)
+
             // Validate the bookingID
             if (!bookingID) {
                 return res.status(400).json({ success: false, message: "Booking ID is required" });
@@ -125,6 +125,42 @@ const bookingController = {
             // Cancel the booking by setting isCancelled to true
             booking.isCancelled = true;
             booking.refundStatus = "Not Applicable";
+
+            // Save the updated booking
+            await booking.save();
+
+            return res.status(200).json({ success: true, message: "Booking successfully cancelled", booking });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: "Failed to cancel the booking" });
+        }
+    },
+    cancelBookingFromDashboard: async (req, res) => {
+        try {
+            const { bookingID } = req.body; // Expect the bookingID in the request body
+
+
+            // Validate the bookingID
+            if (!bookingID) {
+                return res.status(400).json({ success: false, message: "Booking ID is required" });
+            }
+
+            // Find the booking by bookingID
+            const booking = await Booking.findOne({ bookingID });
+
+            // If booking not found
+            if (!booking) {
+                return res.status(404).json({ success: false, message: "Booking not found" });
+            }
+
+            // Check if the booking is already cancelled
+            if (booking.isCancelled) {
+                return res.status(400).json({ success: false, message: "Booking is already cancelled" });
+            }
+
+            // Cancel the booking by setting isCancelled to true
+            booking.isCancelled = true;
+            booking.refundStatus = "Not-Disbursed";
 
             // Save the updated booking
             await booking.save();

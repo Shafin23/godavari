@@ -23,17 +23,6 @@ const instance = new Razorpay({
 app.use(bodyParser.json());
 
 
-app.post("/an", async (req, res) => {
-    try {
-        const { name } = req.body
-        console.log("---------------------->", name)
-        res.json({ message: " Working", name })
-    } catch (error) {
-        res.json({ message: '121' })
-    }
-})
-
-
 // Payment order 
 app.post("/createOrder", async (req, res) => {
     const { amount, currency } = req.body 

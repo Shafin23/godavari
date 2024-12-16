@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const fs = require("fs");
 const path = require("path");
 
-const uploadDir = path.join("uploads");
+const uploadDir = path.join("middleware/uploads");
 console.log(uploadDir)
 
 const applicationMiddleware = (app) => {
